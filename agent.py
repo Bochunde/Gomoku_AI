@@ -1,58 +1,33 @@
 import numpy as np
+from MCTS import MCTS
 
-class agent():
-    #should have two mode: manually 'human' and train_AI: 'AI'
-    #should have different action
-    #should have a validation function to check if the input is valid
+def policy_value_fn(board)->tuple:
+    """a function that takes in a state and outputs a list of (action, probability)
+    tuples and a score for the state"""
+    # return uniform probabilities and 0 score for pure MCTS
+    action_probs = np.ones(len(board.availables))/len(board.availables)
+    return zip(board.availables, action_probs), 0
 
-
-    def __init__(self) :
-        self.chess_color = 'black'
+class agent(object):
+    """AI player based on MCTS"""
+    def __init__(self, epsilon=5, n_step=2000):
+        self.mcts = MCTS(policy_value_fn, epsilon, n_step)
         
-        #chessboard need to be updated every valid action end.
-        self.chessboard = [
-        [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-        [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-        [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-        [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-        [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-        [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-        [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-        [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']]
+    def set_player_ind(self, p):
+        self.player = p
 
-        self.mode = ''
-        return 
+    def reset_player(self):
+        self.mcts.update_with_move(-1)
 
-    
-    def check_action_valid(self,action:tuple):
-        #action should be a tuple
-        position =action[0]+action[1]*8
-        if self.mode =='AI':
-            return True
+    def get_action(self, board):
+        sensible_moves = board.availables
+        if len(sensible_moves) > 0:
+            move = self.mcts.get_move(board)
+            self.mcts.update_with_move(-1)
+            return move
         else:
-            if position < 0 or position > 63 or self.chessboard[action] != ' ':
-                return False
+            print("WARNING: the board is full")
 
-        return True
-
-    def action(self,action:tuple):
-        go = True
-        if self.check_action_valid(action)==False:
-            print('The position is invalid')
-            go = False
-            return go
-
-
-        #action function returns the wether agent actually take the action
-        return go
-    
-
-    #take action, should return observation of the chessboard
-    def step(self):
-        output = 0
-        if self.mode=='human':
-            output = 1
-        elif self.mode== 'AI':
-            output = 0
-        return
+    def __str__(self):
+        return "MCTS {}".format(self.player)
     

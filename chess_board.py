@@ -14,7 +14,9 @@ class chessboard():
 
     def __init__(self):
         self.turn ='Black'
-
+        self.player1 = agent()
+        self.player2 = agent()
+        self.player = [self.player1,self.player2]
         #initialize chessboard
         self.chessboard = [
         [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
@@ -26,12 +28,7 @@ class chessboard():
         [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
         [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']]
 
-        #initialize agent
-        self.agentBlack = agent()
-        self.agentBlack.chess_color='black'
 
-        self.agentWhite = agent()
-        self.agentWhite.chess_color='white'
 
     #action takes agent and action as input
     def action(self,agent:agent,action:tuple):
@@ -39,16 +36,14 @@ class chessboard():
             if agent.chess_color == 'black':
                 #update chessboard
                 self.chessboard[action] = 'o' 
-                self.agentBlack.chessboard = self.chessboard
-                self.agentWhite.chessboard = self.chessboard
+
                 #switch turn
                 self.turn = 'white'
 
             elif agent.chess_color =='white':
                 #update chessboard
                 self.chessboard[action] = 'x'
-                self.agentBlack.chessboard = self.chessboard
-                self.agentWhite.chessboard = self.chessboard
+
                 #switch turn
                 self.turn = 'black'
         return
