@@ -1,12 +1,13 @@
 import numpy as np
 from Node import Node
-from chess_board import chessboard
+from AlphaZero_Gomoku.game import Board
+
 def softmax(x):
     probs = np.exp(x - np.max(x))
     probs = probs / np.sum(probs)
     return probs
 class MCTS(object):
-    def __init__(self, policy_value_fn, epsilon=5, n_step=10000,mode=None):
+    def __init__(self, policy_value_fn, epsilon=5, n_step=10000):
         """
         policy_value_fn: a function that takes in a board state and outputs
             a list of (action, probability) tuples and also a score in [-1, 1]
@@ -20,8 +21,8 @@ class MCTS(object):
         self.policy = policy_value_fn
         self.epsilon = epsilon
         self.n_step = n_step
-        self.mode = mode
-    def play(self, chessboard:chessboard):
+        
+    def play(self, chessboard:Board):
         "playout"
         """Run a single playout from the root to the leaf, getting a value at
         the leaf and propagating it back through its parents.
@@ -33,43 +34,29 @@ class MCTS(object):
                 break
             # Greedily select next move.
             action, node = node.select(self.epsilon)
-            chessboard.action(action)
-        
-        action_probs, leaf_value = self.policy(chessboard)
+            chessboard.do_move(action)
+
+        action_probs, _ = self.policy(chessboard)
         # Check for end of game
         end, winner = chessboard.game_end()
-        if self.mode is not None:
-            if not end:
-                node.expand(action_probs)
-            # Evaluate the leaf node by random rollout
-            leaf_value = self.evaluate_rollout(chessboard)
-            node.update(-leaf_value)
-        else:
-            leaf_value = leaf_value.cpu().numpy()
-            end,winner = chessboard.game_end()
-            if not end:
-                node.expand(action_probs)
-            else:
-                # for end state，return the "true" leaf_value
-                if winner == -1:  # tie
-                    leaf_value = 0.0
-                else:
-                    leaf_value = (
-                        1.0 if winner == chessboard.curr_agent else -1.0
-                    ) 
+        if not end:
+            node.expand(action_probs)
+        # Evaluate the leaf node by random rollout
+        leaf_value = self.evaluate_rollout(chessboard)
+        node.update(-leaf_value)
 
-    def rollout_policy_fn(board:chessboard):
+    def rollout_policy_fn(board:Board):
         """a coarse, fast version of policy_fn used in the rollout phase."""
         # rollout randomly
         action_probs = np.random.rand(len(board.availables))
         return zip(board.availables, action_probs)
     
-    def evaluate_rollout(self, chessboard:chessboard, limit=1000):
+    def evaluate_rollout(self, chessboard:Board, limit=1000):
         """Use the rollout policy to play until the end of the game,
         returning +1 if the current player wins, -1 if the opponent wins,
         and 0 if it is a tie.
         """
-        player = chessboard.curr_agent
+        player = chessboard.get_current_player()
         for i in range(limit):
             end, winner = chessboard.game_end()
             if end:
@@ -77,7 +64,7 @@ class MCTS(object):
             action_probs = self.rollout_policy_fn(chessboard)
             action = max(action_probs, key=lambda x: x[1])[0]
             #max_action = max(action_probs, key=itemgetter(1))[0]
-            chessboard.action(action)
+            chessboard.do_move(action)
         else:
             # If no break from the loop, issue a warning.
             print("WARNING: rollout reached move limit")
@@ -88,7 +75,7 @@ class MCTS(object):
         else:
             return -1
 
-    def get_move(self, chessboard:chessboard,epsilon = None):
+    def get_move(self, chessboard:Board,epsilon = None):
         """Runs all playouts sequentially and returns the most visited action.
         state: the current game state
 
@@ -98,8 +85,8 @@ class MCTS(object):
             chessboard_copy = np.array(chessboard)
             self.play(chessboard_copy)
         if epsilon:
-            act_visits = [(act, self.n_visit)
-                        for act, node in self.root.children.items()]
+            act_visits = [(act, node._n_visits)
+                        for act, node in self._root._children.items()]
             acts, visits = zip(*act_visits)
             act_probs = softmax(1.0/epsilon * np.log(np.array(visits) + 1e-10))
             return acts, act_probs            
