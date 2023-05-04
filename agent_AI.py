@@ -6,7 +6,7 @@ class agent_AI(object):
 
     def __init__(self, policy_value_function,
                  c_puct=5, n_playout=2000, is_selfplay=0):
-        self.mcts = MCTS(policy_value_function, c_puct, n_playout)
+        self.mcts = MCTS(policy_value_function, c_puct, n_playout,AI=True)
         self._is_selfplay = is_selfplay
 
     def set_player_ind(self, p):
@@ -18,7 +18,7 @@ class agent_AI(object):
     def get_action(self, board:chessboard, epsilon=1e-3, return_prob=0):
         sensible_moves = board.possible_move
         # the pi vector returned by MCTS as in the alphaGo Zero paper
-        move_probs = np.zeros(8,8)
+        move_probs = np.zeros((8,8))
         if len(sensible_moves) > 0:
             acts, probs = self.mcts.get_move(board, epsilon)
             move_probs[list(acts)] = probs

@@ -7,13 +7,14 @@ class Node(object):
         self.Q = 0
         self.P = prior
     
-    def expand(self, action_priors:list(tuple)):
+    def expand(self, action_priors):
         for action, prior in action_priors:
             if action not in self.children:
                 self.children[action]=Node(self,prior)
 
     def select(self,epsilon:int)->tuple:
-        maxpair = max(self.children.items(), key=lambda x: x[1].get_value(epsilon))
+        #return int and Node
+        maxpair = max(self.children.items(), key=lambda x: x[1].node_value(epsilon))
         return maxpair
     
     def node_value(self,epsilon)->float:
@@ -33,6 +34,6 @@ class Node(object):
         else:
             return True
         
-    def is_bottom(self):
+    def is_leaf(self):
         return self.children =={}
 

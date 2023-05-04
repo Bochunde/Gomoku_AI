@@ -37,13 +37,10 @@ class TrainPipeline():
         if init_model:
             # start training from an initial policy-value net
             print('start train on exist model')
-            self.policy_value_net = PolicyValueNet(self.board_width,
-                                                   self.board_height,
-                                                   model_file=init_model)
+            self.policy_value_net = PolicyValueNet(model_file=init_model)
         else:
             # start training from a new policy-value net
-            self.policy_value_net = PolicyValueNet(self.board_width,
-                                                   self.board_height)
+            self.policy_value_net = PolicyValueNet()
         self.mcts_player = agent_AI(self.policy_value_net.policy_value_fn,
                                       c_puct=self.c_puct,
                                       n_playout=self.n_playout,

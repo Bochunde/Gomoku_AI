@@ -54,11 +54,13 @@ class chessboard():
     #action takes agent and action as input
     def action(self,action:int):
         #action: (x,y) in chessboard
-        self.states[action] = self.curr_agent
-        h = action//8
-        w = action % 8
-        self.chessboard[(h,w)] = 'X' if self.curr_agent ==1 else 'O'
+        print(action)
         self.possible_move.remove(action)
+        self.states[action] = self.curr_agent
+        h = action //8
+        w = action % 8
+        self.chessboard[h][w] = 'X' if self.curr_agent ==1 else 'O'
+        
 
         #update current agant
         self.curr_agent = 1 if self.curr_agent==2 else 2
@@ -90,14 +92,14 @@ class chessboard():
         print(border)
 
     #check_win should run after each time agent takes action
-    def check_win(self)->tuple(bool ,int):
+    def check_win(self):
         #check rows for win
         for row in self.chessboard:
             for i in range(len(row)-4):
                 if row[i:i+5] == ['O', 'O', 'O', 'O', 'O']:
-                    return True,2
+                    return (True,2)
                 elif row[i:i+5] == ['X', 'X', 'X', 'X', 'X']:
-                    return True,1
+                    return (True,1)
                     
         # Check columns for win
         for j in range(len(self.chessboard)):
@@ -117,15 +119,17 @@ class chessboard():
                     
                 if [self.chessboard[i+k][j+4-k] for k in range(5)] == ['O', 'O', 'O', 'O', 'O']:
                     return True,2
-                elif [self.chessboardard[i+k][j+4-k] for k in range(5)] == ['X', 'X', 'X', 'X', 'X']:
+                elif [self.chessboard[i+k][j+4-k] for k in range(5)] == ['X', 'X', 'X', 'X', 'X']:
                     return True,1
 
-        return False,-1
+        return (False,-1)
     
-    def game_end(self)->bool:
+    def game_end(self):
         end,winner = self.check_win()
         if end:
-            return (end,winner)
+            return end,winner
         elif self.possible_move==[]:
-            return (True,-1)
+            return True,-1
+        else:
+            return False,-1
     

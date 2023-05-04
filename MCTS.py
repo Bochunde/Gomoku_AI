@@ -1,12 +1,13 @@
 import numpy as np
 from Node import Node
 from chess_board import chessboard
+import copy
 def softmax(x):
     probs = np.exp(x - np.max(x))
     probs = probs / np.sum(probs)
     return probs
 class MCTS(object):
-    def __init__(self, policy_value_fn, epsilon=5, n_step=10000,mode=None):
+    def __init__(self, policy_value_fn, epsilon=5, n_step=10000,AI=False):
         """
         policy_value_fn: a function that takes in a board state and outputs
             a list of (action, probability) tuples and also a score in [-1, 1]
@@ -20,7 +21,7 @@ class MCTS(object):
         self.policy = policy_value_fn
         self.epsilon = epsilon
         self.n_step = n_step
-        self.mode = mode
+        self.AI = AI
     def play(self, chessboard:chessboard):
         "playout"
         """Run a single playout from the root to the leaf, getting a value at
@@ -28,8 +29,8 @@ class MCTS(object):
         State is modified in-place, so a copy must be provided.
         """
         node = self.root
-        while True:
-            if node.is_bottom():
+        while(1):
+            if node.is_leaf():
                 break
             # Greedily select next move.
             action, node = node.select(self.epsilon)
@@ -38,7 +39,7 @@ class MCTS(object):
         action_probs, leaf_value = self.policy(chessboard)
         # Check for end of game
         end, winner = chessboard.game_end()
-        if self.mode is not None:
+        if self.AI==False:
             if not end:
                 node.expand(action_probs)
             # Evaluate the leaf node by random rollout
@@ -47,7 +48,7 @@ class MCTS(object):
         else:
             leaf_value = leaf_value.cpu().numpy()
             end,winner = chessboard.game_end()
-            if not end:
+            if end==False:
                 node.expand(action_probs)
             else:
                 # for end state，return the "true" leaf_value
@@ -94,18 +95,16 @@ class MCTS(object):
 
         Return: the selected action
         """
-        for i in range(self.n_step):
-            chessboard_copy = np.array(chessboard)
-            self.play(chessboard_copy)
-        if epsilon:
-            act_visits = [(act, self.n_visit)
-                        for act, node in self.root.children.items()]
-            acts, visits = zip(*act_visits)
-            act_probs = softmax(1.0/epsilon * np.log(np.array(visits) + 1e-10))
-            return acts, act_probs            
-        else:
-            return max(self.root.children.items(),
-                   key=lambda act_node: act_node[1].n_visit)[0]
+        for n in range(self.n_step):
+            chessboard = copy.deepcopy(chessboard)
+            self.play(chessboard)
+
+        # calc the move probabilities based on visit counts at the root node
+        act_visits = [(act, node.n_visits) for act, node in self.root.children.items()]
+        acts, visits = zip(*act_visits)
+        act_probs = softmax(1.0/epsilon * np.log(np.array(visits) + 1e-10))
+
+        return acts, act_probs
 
     def update_with_move(self, last_move):
         """Step forward in the tree, keeping everything we already know
