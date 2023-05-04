@@ -23,7 +23,6 @@ class agent_AI(object):
             acts, probs = self.mcts.get_move(board, epsilon)
             move_probs[list(acts)] = probs
             if self.is_selfplay:
-                print('go random')
                 # add Dirichlet Noise for exploration (needed for
                 # self-play training)
                 move = np.random.choice(
@@ -33,7 +32,6 @@ class agent_AI(object):
                 # update the root node and reuse the search tree
                 self.mcts.update_with_move(move)
             else:
-                print('not go random')
                 # with the epsilon=1e-3, it will choose the move with the highest prob
                 move = np.random.choice(acts, p=probs)
                 # reset the root node

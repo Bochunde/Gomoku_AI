@@ -48,9 +48,7 @@ class MCTS(object):
             node.update(-leaf_value)
         else:
             leaf_value = leaf_value.cpu().numpy()
-            end,winner = chessboard.game_end()
             if end==False:
-
                 node.expand(action_probs)
             else:
                 # for end state，return the "true" leaf_value
@@ -99,10 +97,11 @@ class MCTS(object):
 
         Return: the selected action
         """
+        print(len(chessboard.possible_move))
         for n in range(self.n_step):
             chessboard_copy = copy.deepcopy(chessboard)
             self.play(chessboard_copy)
-
+        
         # calc the move probabilities based on visit counts at the root node
         act_visits = [(act, node.n_visits) for act, node in self.root.children.items()]
         acts, visits = zip(*act_visits)
@@ -115,11 +114,11 @@ class MCTS(object):
         about the subtree.
         """
         if last_move in self.root.children:
-            print('update last move')
             self.root = self.root.children[last_move]
             self.root.parent = None
         else:
-            print('failed update')
+            print(last_move)
+            print('go back to root')
             self.root = Node(None, 1.0)
 
     def __str__(self):

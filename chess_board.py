@@ -128,7 +128,7 @@ class chessboard():
         end,winner = self.check_win()
         if end:
             return end,winner
-        elif self.possible_move==[]:
+        elif len(self.possible_move)==0:#end is false and board is full
             return True,-1
         else:
             return False,-1
