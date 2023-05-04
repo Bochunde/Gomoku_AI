@@ -39,6 +39,7 @@ class MCTS(object):
         action_probs, leaf_value = self.policy(chessboard)
         # Check for end of game
         end, winner = chessboard.game_end()
+
         if self.AI==False:
             if not end:
                 node.expand(action_probs)
@@ -49,15 +50,18 @@ class MCTS(object):
             leaf_value = leaf_value.cpu().numpy()
             end,winner = chessboard.game_end()
             if end==False:
+
                 node.expand(action_probs)
             else:
                 # for end state，return the "true" leaf_value
+
                 if winner == -1:  # tie
                     leaf_value = 0.0
                 else:
                     leaf_value = (
-                        1.0 if winner == chessboard.curr_agent else -1.0
+                        1.0 if winner == chessboard.current_player else -1.0
                     ) 
+        node.update_recursive(-leaf_value)
 
     def rollout_policy_fn(board:chessboard):
         """a coarse, fast version of policy_fn used in the rollout phase."""
@@ -70,7 +74,7 @@ class MCTS(object):
         returning +1 if the current player wins, -1 if the opponent wins,
         and 0 if it is a tie.
         """
-        player = chessboard.curr_agent
+        player = chessboard.current_player
         for i in range(limit):
             end, winner = chessboard.game_end()
             if end:
@@ -89,15 +93,15 @@ class MCTS(object):
         else:
             return -1
 
-    def get_move(self, chessboard:chessboard,epsilon = None):
+    def get_move(self, chessboard:chessboard,epsilon):
         """Runs all playouts sequentially and returns the most visited action.
         state: the current game state
 
         Return: the selected action
         """
         for n in range(self.n_step):
-            chessboard = copy.deepcopy(chessboard)
-            self.play(chessboard)
+            chessboard_copy = copy.deepcopy(chessboard)
+            self.play(chessboard_copy)
 
         # calc the move probabilities based on visit counts at the root node
         act_visits = [(act, node.n_visits) for act, node in self.root.children.items()]
@@ -111,9 +115,11 @@ class MCTS(object):
         about the subtree.
         """
         if last_move in self.root.children:
+            print('update last move')
             self.root = self.root.children[last_move]
             self.root.parent = None
         else:
+            print('failed update')
             self.root = Node(None, 1.0)
 
     def __str__(self):

@@ -28,7 +28,7 @@ class Game(object):
         if is_shown:
             self.board.render()
         while True:
-            current_player = self.board.curr_agent
+            current_player = self.board.current_player
             player_in_turn = players[current_player]
             move = player_in_turn.get_action(self.board)
             self.board.action(move)
@@ -48,13 +48,14 @@ class Game(object):
         """ start a self-play game using a MCTS player, reuse the search tree,
         and store the self-play data: (state, mcts_probs, z) for training
         """
-        self.board.init_board()
+        self.board.init_board(1)
         p1, p2 = self.board.players
         states, mcts_probs, current_players = [], [], []
         while True:
             move, move_probs = player.get_action(self.board,
                                                  epsilon=temp,
                                                  return_prob=1)
+
             # store the data
             states.append(self.board.current_state())
             mcts_probs.append(move_probs)

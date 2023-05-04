@@ -22,17 +22,21 @@ class Node(object):
                   /(1+self.n_visits))
         return self.Q + update
     
-    def update(self,child_value:float):
-        if self.parent:
-            self.parent.update(-child_value)
+    def update(self,leaf_value:float):
         self.n_visits += 1
-        self.Q += (child_value-self.Q) / self.n_visits
-    
-    def is_root(self):
+        # Update Q, a running average of values for all visits.
+        self.Q += 1.0*(leaf_value - self.Q) / self.n_visits
+
+    def update_recursive(self, leaf_value):
+        """Like a call to update(), but applied recursively for all ancestors.
+        """
+        # If it is not root, this node's parent should be updated first.
         if self.parent:
-            return False
-        else:
-            return True
+            self.parent.update_recursive(-leaf_value)
+        self.update(leaf_value)
+
+    def is_root(self):
+        return self.parent is None
         
     def is_leaf(self):
         return self.children =={}

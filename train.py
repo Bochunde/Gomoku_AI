@@ -8,7 +8,7 @@ from collections import defaultdict, deque
 from policy_network import PolicyValueNet
 import time
 class TrainPipeline():
-    def __init__(self, init_model='current_policy.model'):
+    def __init__(self, init_model=None):
         # params of the board and the game
         self.board_width = 8
         self.board_height = 8
@@ -44,7 +44,7 @@ class TrainPipeline():
         self.mcts_player = agent_AI(self.policy_value_net.policy_value_fn,
                                       c_puct=self.c_puct,
                                       n_playout=self.n_playout,
-                                      is_selfplay=1)
+                                      is_selfplay=True)
 
     def get_equi_data(self, play_data):
         """augment the data set by rotation and flipping
@@ -68,9 +68,10 @@ class TrainPipeline():
                                     winner))
         return extend_data
 
-    def collect_selfplay_data(self, n_games=1):
+    def collect_selfplay_data(self, n_games=10):
         """collect self-play data for training"""
         for i in range(n_games):
+
             winner, play_data = self.game.start_self_play(self.mcts_player,
                                                           temp=self.temp)
             play_data = list(play_data)[:]

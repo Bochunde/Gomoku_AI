@@ -7,9 +7,9 @@ class chessboard():
 
 
     def __init__(self):
-        self.possible_move = list(range(64))
+        
         self.players = [1,2]
-        self.curr_agent = 1 
+        #self.curr_agent = 1 
         self.last_move = -1
         #initialize chessboard
         self.states = {}
@@ -25,7 +25,7 @@ class chessboard():
     def init_board(self, start_player=0):
         self.current_player = self.players[start_player]  # start player
         # keep available moves in a list
-        self.availables = list(range(8,8))
+        self.possible_move = list(range(64))
         self.states = {}
         self.last_move = -1
 
@@ -37,8 +37,8 @@ class chessboard():
             square_state = np.zeros((4, 8, 8))
             if self.states:
                 moves, players = np.array(list(zip(*self.states.items())))
-                move_curr = moves[players == self.curr_agent]
-                move_oppo = moves[players != self.curr_agent]
+                move_curr = moves[players == self.current_player]
+                move_oppo = moves[players != self.current_player]
                 square_state[0][move_curr // 8,
                                 move_curr % 8] = 1.0
                 square_state[1][move_oppo // 8,
@@ -54,21 +54,21 @@ class chessboard():
     #action takes agent and action as input
     def action(self,action:int):
         #action: (x,y) in chessboard
-        print(action)
+        self.states[action] = self.current_player
+        
         self.possible_move.remove(action)
-        self.states[action] = self.curr_agent
         h = action //8
         w = action % 8
-        self.chessboard[h][w] = 'X' if self.curr_agent ==1 else 'O'
+        self.chessboard[h][w] = 'X' if self.current_player ==1 else 'O'
         
 
         #update current agant
-        self.curr_agent = 1 if self.curr_agent==2 else 2
+        self.current_player = 1 if self.current_player==2 else 2
 
         self.last_move = action
 
     def render(self)->None:
-        curr_player = 'Player2' if self.curr_agent==2 else 'Player1'
+        curr_player = 'Player2' if self.current_player==2 else 'Player1'
         print(curr_player+' turn')         
         self.display_board(self.chessboard)
         end,winner = self.game_end()
@@ -122,7 +122,7 @@ class chessboard():
                 elif [self.chessboard[i+k][j+4-k] for k in range(5)] == ['X', 'X', 'X', 'X', 'X']:
                     return True,1
 
-        return (False,-1)
+        return False,-1
     
     def game_end(self):
         end,winner = self.check_win()

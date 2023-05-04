@@ -5,9 +5,9 @@ class agent_AI(object):
     """AI player based on MCTS"""
 
     def __init__(self, policy_value_function,
-                 c_puct=5, n_playout=2000, is_selfplay=0):
+                 c_puct=5, n_playout=2000, is_selfplay=False):
         self.mcts = MCTS(policy_value_function, c_puct, n_playout,AI=True)
-        self._is_selfplay = is_selfplay
+        self.is_selfplay = is_selfplay
 
     def set_player_ind(self, p):
         self.player = p
@@ -18,11 +18,12 @@ class agent_AI(object):
     def get_action(self, board:chessboard, epsilon=1e-3, return_prob=0):
         sensible_moves = board.possible_move
         # the pi vector returned by MCTS as in the alphaGo Zero paper
-        move_probs = np.zeros((8,8))
+        move_probs = np.zeros(64)
         if len(sensible_moves) > 0:
             acts, probs = self.mcts.get_move(board, epsilon)
             move_probs[list(acts)] = probs
-            if self._is_selfplay:
+            if self.is_selfplay:
+                print('go random')
                 # add Dirichlet Noise for exploration (needed for
                 # self-play training)
                 move = np.random.choice(
@@ -32,6 +33,7 @@ class agent_AI(object):
                 # update the root node and reuse the search tree
                 self.mcts.update_with_move(move)
             else:
+                print('not go random')
                 # with the epsilon=1e-3, it will choose the move with the highest prob
                 move = np.random.choice(acts, p=probs)
                 # reset the root node
