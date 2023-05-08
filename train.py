@@ -22,7 +22,7 @@ class TrainPipeline():
         self.n_playout = 1000  # num of simulations for each move
         self.c_puct = 5
         self.buffer_size = 100
-        self.batch_size = 256  # mini-batch size for training
+        self.batch_size = 512  # mini-batch size for training
         self.data_buffer = deque(maxlen=self.buffer_size)
         self.play_batch_size = 1
         self.epochs = 5  # num of train_steps for each update
@@ -68,7 +68,7 @@ class TrainPipeline():
                                     winner))
         return extend_data
 
-    def collect_selfplay_data(self, n_games=10):
+    def collect_selfplay_data(self, n_games=1):
         """collect self-play data for training"""
         for i in range(n_games):
 

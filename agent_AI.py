@@ -5,7 +5,7 @@ class agent_AI(object):
     """AI player based on MCTS"""
 
     def __init__(self, policy_value_function,
-                 c_puct=5, n_playout=2000, is_selfplay=False):
+                 c_puct=5, n_playout=2000, is_selfplay = False):
         self.mcts = MCTS(policy_value_function, c_puct, n_playout,AI=True)
         self.is_selfplay = is_selfplay
 

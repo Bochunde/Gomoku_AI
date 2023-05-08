@@ -35,20 +35,21 @@ class MCTS(object):
             # Greedily select next move.
             action, node = node.select(self.epsilon)
             chessboard.action(action)
-        
-        action_probs, leaf_value = self.policy(chessboard)
-        # Check for end of game
-        end, winner = chessboard.game_end()
-
         if self.AI==False:
+            action_probs, leaf_value = self.policy(chessboard)
+        # Check for end of game
+            end, winner = chessboard.game_end()
             if not end:
                 node.expand(action_probs)
             # Evaluate the leaf node by random rollout
             leaf_value = self.evaluate_rollout(chessboard)
             node.update(-leaf_value)
         else:
+            action_probs, leaf_value = self.policy(chessboard)
+        # Check for end of game
+            end, winner = chessboard.game_end()
             leaf_value = leaf_value.cpu().numpy()
-            if end==False:
+            if not end:
                 node.expand(action_probs)
             else:
                 # for end state，return the "true" leaf_value
@@ -59,7 +60,7 @@ class MCTS(object):
                     leaf_value = (
                         1.0 if winner == chessboard.current_player else -1.0
                     ) 
-        node.update_recursive(-leaf_value)
+            node.update_recursive(-leaf_value)
 
     def rollout_policy_fn(board:chessboard):
         """a coarse, fast version of policy_fn used in the rollout phase."""
@@ -101,12 +102,12 @@ class MCTS(object):
         for n in range(self.n_step):
             chessboard_copy = copy.deepcopy(chessboard)
             self.play(chessboard_copy)
-        
+
         # calc the move probabilities based on visit counts at the root node
         act_visits = [(act, node.n_visits) for act, node in self.root.children.items()]
         acts, visits = zip(*act_visits)
         act_probs = softmax(1.0/epsilon * np.log(np.array(visits) + 1e-10))
-
+            #print(len(act_visits))
         return acts, act_probs
 
     def update_with_move(self, last_move):

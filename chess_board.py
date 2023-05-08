@@ -3,7 +3,6 @@ class chessboard():
     #chessboard class should define the chessboard state
     #check if game end
     #taking 2 agent as black/white
-    # o represents black and x represents white
 
 
     def __init__(self):
@@ -60,17 +59,17 @@ class chessboard():
         h = action //8
         w = action % 8
         self.chessboard[h][w] = 'X' if self.current_player ==1 else 'O'
-        
-
         #update current agant
-        self.current_player = 1 if self.current_player==2 else 2
-
+        self.current_player = (
+            self.players[0] if self.current_player == self.players[1]
+            else self.players[1]
+        )
         self.last_move = action
 
     def render(self)->None:
         curr_player = 'Player2' if self.current_player==2 else 'Player1'
         print(curr_player+' turn')         
-        self.display_board(self.chessboard)
+        self.display_board()
         end,winner = self.game_end()
         if end:
             if winner ==1:
@@ -124,8 +123,41 @@ class chessboard():
 
         return False,-1
     
+    def has_a_winner(self):
+        width = 8
+        height = 8
+        states = self.states
+        n = 5
+
+        moved = list(set(range(width * height)) - set(self.possible_move))
+        if len(moved) < 5 *2-1:
+            return False, -1
+
+        for m in moved:
+            h = m // width
+            w = m % width
+            player = states[m]
+
+            if (w in range(width - n + 1) and
+                    len(set(states.get(i, -1) for i in range(m, m + n))) == 1):
+                return True, player
+
+            if (h in range(height - n + 1) and
+                    len(set(states.get(i, -1) for i in range(m, m + n * width, width))) == 1):
+                return True, player
+
+            if (w in range(width - n + 1) and h in range(height - n + 1) and
+                    len(set(states.get(i, -1) for i in range(m, m + n * (width + 1), width + 1))) == 1):
+                return True, player
+
+            if (w in range(n - 1, width) and h in range(height - n + 1) and
+                    len(set(states.get(i, -1) for i in range(m, m + n * (width - 1), width - 1))) == 1):
+                return True, player
+
+        return False, -1
+    
     def game_end(self):
-        end,winner = self.check_win()
+        end,winner = self.has_a_winner()
         if end:
             return end,winner
         elif len(self.possible_move)==0:#end is false and board is full

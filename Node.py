@@ -5,6 +5,7 @@ class Node(object):
         self.children = {}  # action->node
         self.n_visits = 0
         self.Q = 0
+        self.u = 0
         self.P = prior
     
     def expand(self, action_priors):
@@ -17,10 +18,10 @@ class Node(object):
         maxpair = max(self.children.items(), key=lambda x: x[1].node_value(epsilon))
         return maxpair
     
-    def node_value(self,epsilon)->float:
-        update = (epsilon * self.P * np.sqrt(self.parent.n_visits)
+    def node_value(self,epsilon):
+        self.u = (epsilon * self.P * np.sqrt(self.parent.n_visits)
                   /(1+self.n_visits))
-        return self.Q + update
+        return self.Q + self.u
     
     def update(self,leaf_value:float):
         self.n_visits += 1

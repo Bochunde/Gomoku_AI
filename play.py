@@ -48,8 +48,7 @@ class Game(object):
         """ start a self-play game using a MCTS player, reuse the search tree,
         and store the self-play data: (state, mcts_probs, z) for training
         """
-        self.board.init_board(1)
-        p1, p2 = self.board.players
+        self.board.init_board()
         states, mcts_probs, current_players = [], [], []
         while True:
             move, move_probs = player.get_action(self.board,
