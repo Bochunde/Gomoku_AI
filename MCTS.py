@@ -98,7 +98,7 @@ class MCTS(object):
 
         Return: the selected action
         """
-        print(len(chessboard.possible_move))
+
         for n in range(self.n_step):
             chessboard_copy = copy.deepcopy(chessboard)
             self.play(chessboard_copy)
@@ -118,8 +118,7 @@ class MCTS(object):
             self.root = self.root.children[last_move]
             self.root.parent = None
         else:
-            print(last_move)
-            print('go back to root')
+
             self.root = Node(None, 1.0)
 
     def __str__(self):

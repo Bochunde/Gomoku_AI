@@ -27,7 +27,15 @@ class chessboard():
         self.possible_move = list(range(64))
         self.states = {}
         self.last_move = -1
-
+        self.chessboard = [
+        [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+        [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+        [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+        [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+        [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+        [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+        [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+        [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']]
     def current_state(self):
             """return the board state from the perspective of the current player.
             state shape: 4*width*height
@@ -82,7 +90,7 @@ class chessboard():
                 print('tie')
                 return
     def display_board(self):
-        border = " | " + " | ".join(str(i) for i in range(1, len(self.chessboard)+1)) + " |"
+        border = " | " + " | ".join(str(i) for i in range(0, len(self.chessboard))) + " |"
         print(border)
         for i in range(len(self.chessboard)):
             row = self.chessboard[i]

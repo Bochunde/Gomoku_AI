@@ -14,13 +14,16 @@ class agent_human(object):
 
         location = input("Your move: ")
         location.replace(" ","")
-        move = location.split(',')
+
         try:
-            move = move[0]*8+move[1]
-            if move > 63 or move < 0 or move not in board.possible_move:
-                move = -1
-        except:
-            move = -1
+            x, y = map(int, location.split(','))
+            move = x*8 +y
+            if move not in board.possible_move:
+                print('invalid move')
+                move = self.get_action(board)
+        except ValueError:
+            print("Invalid input. Please enter two integers separated by a comma.")
+            move =-1
         if move == -1:
             print("invalid move")
             move = self.get_action(board)
