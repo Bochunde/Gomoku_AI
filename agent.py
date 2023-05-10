@@ -10,8 +10,8 @@ def policy_value_fn(board:chessboard)->tuple:
 
 class agent(object):
     """MCTS not using NN"""
-    def __init__(self,epsilon=5, n_step=2000):
-        self.mcts = MCTS(policy_value_fn, epsilon, n_step,False)
+    def __init__(self,temp=5, n_step=2000):
+        self.mcts = MCTS(policy_value_fn, temp, n_step,False)
 
     def set_player_ind(self, p):
         self.player = p
@@ -22,7 +22,7 @@ class agent(object):
     def get_action(self, board:chessboard):
         sensible_moves = board.possible_move
         if len(sensible_moves) > 0:
-            move = self.mcts.get_move(board)
+            move = self.mcts.get_move(board,epsilon=1e-3)
             self.mcts.update_with_move(-1)
             return move
         else:
