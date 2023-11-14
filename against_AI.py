@@ -18,5 +18,5 @@ if __name__=='__main__':
     policy_file = 'trained_policy/best_policy_12.model' 
     p_fc = PolicyValueNet(policy_file).policy_value_fn
     p1 = agent_human()
-    p2 = agent_AI(p_fc)
+    p2 = agent()
     game.start_play(p1,p2,start_player=0,is_shown=True)
